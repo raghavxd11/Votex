@@ -39,8 +39,9 @@ for table in tables:
         for r in rows:
             print(f"  -> {r}")
     else:
-        print("  (Table is currently empty)")
+        print("  (Table currently has 0 records)")
     print()
 
 conn.close()
 print("==================================================")
+print("💡 Tip in Antigravity IDE: Run 'python inspect_db.py' anytime to view DB tables!")
