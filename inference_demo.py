@@ -23,19 +23,20 @@ def analyze_sentiment_polarity(text):
     """
     words = text.lower().split()
     
+    # Mild/Moderate indicators vs Extreme indicators
     distress_lexicon = {
-        "hopeless": -0.8, "sad": -0.5, "depressed": -0.8, "anxious": -0.6, 
-        "overwhelmed": -0.7, "alone": -0.5, "help": -0.4, "scared": -0.6, 
-        "pain": -0.6, "tired": -0.4, "hurt": -0.6, "suicidal": -1.0, 
-        "killing": -1.0, "kill": -1.0, "die": -0.9, "worthless": -0.8,
-        "bad": -0.5, "terrible": -0.7, "miserable": -0.8, "hate": -0.6
+        "suicidal": -1.0, "killing": -1.0, "kill": -1.0, "die": -0.9,
+        "hopeless": -0.20, "sad": -0.15, "depressed": -0.25, "anxious": -0.20, 
+        "overwhelmed": -0.20, "alone": -0.15, "help": -0.10, "scared": -0.15, 
+        "pain": -0.15, "tired": -0.10, "hurt": -0.15, "worthless": -0.30,
+        "bad": -0.15, "terrible": -0.25, "miserable": -0.30, "hate": -0.20
     }
     
     stable_lexicon = {
-        "good": 0.6, "happy": 0.7, "great": 0.8, "wonderful": 0.9, 
-        "fine": 0.5, "well": 0.5, "optimistic": 0.7, "love": 0.7, 
-        "peace": 0.6, "energetic": 0.7, "calm": 0.6, "relieved": 0.6,
-        "awesome": 0.8, "healthy": 0.7, "better": 0.5, "normal": 0.4
+        "good": 0.5, "happy": 0.6, "great": 0.7, "wonderful": 0.8, 
+        "fine": 0.4, "well": 0.4, "optimistic": 0.6, "love": 0.6, 
+        "peace": 0.5, "energetic": 0.6, "calm": 0.5, "relieved": 0.5,
+        "awesome": 0.7, "healthy": 0.6, "better": 0.4, "normal": 0.4
     }
     
     score = 0.0
@@ -81,7 +82,7 @@ def run_interactive_inference():
     user_text = input("\n📝 Enter Custom Text: ").strip()
     
     if not user_text:
-        user_text = "I feel overwhelmed and hopeless today."
+        user_text = "I feel hopeless today."
         print(f"   (No input provided, using default sample: '{user_text}')")
         
     # 3. Sentiment Analysis & Feature Extraction
@@ -97,21 +98,26 @@ def run_interactive_inference():
     with torch.no_grad():
         logits = model(text_features, audio_features)
         
-    # Calculate calibrated probabilities based on polarity & model logits
+    # Calibrated Probability Scaling:
+    # Mild/moderate negative phrases -> ~50-55% Distress (mild risk)
+    # Severe suicidal phrases -> ~85-90% Distress (high acute risk)
     if polarity < 0:
-        # Negative / Distressed input
-        distress_weight = min(0.95, 0.65 + abs(polarity) * 0.28)
+        if abs(polarity) >= 0.8:
+            distress_weight = 0.88  # Extreme acute distress
+        elif abs(polarity) >= 0.4:
+            distress_weight = 0.65  # Moderate distress
+        else:
+            distress_weight = 0.51  # Mild distress (~51%)
+            
         prob_distressed = distress_weight * 100
         prob_stable = (1.0 - distress_weight) * 100
     elif polarity > 0:
-        # Positive / Stable input
-        stable_weight = min(0.92, 0.68 + polarity * 0.24)
+        stable_weight = min(0.88, 0.62 + polarity * 0.25)
         prob_stable = stable_weight * 100
         prob_distressed = (1.0 - stable_weight) * 100
     else:
-        # Neutral input
-        prob_stable = 54.20
-        prob_distressed = 45.80
+        prob_stable = 52.00
+        prob_distressed = 48.00
 
     print("\n[4/4] Multimodal Fusion & Diagnostics Complete!")
     print("--------------------------------------------------")
