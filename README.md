@@ -16,9 +16,9 @@ The platform includes a FastAPI backend, a Next.js 14 web interface, and explain
 ## ✨ Key Features
 - **🧠 Multimodal Fusion Engine**: Synergizes 40-dimensional MFCC acoustic features with 768-dimensional BERT text embeddings using PyTorch Multi-Head Cross-Attention.
 - **🎙️ Speech & Text Diagnostics**: Real-time microphone audio processing combined with transcript text classification.
-- **🤖 AI Support Assistant**: Interactive conversational interface powered by Google Gemini API (`GEMINI_API_KEY`) that provides grounding recommendations based on distress predictions.
+- **🤖 AI Assistant**: Conversational chat interface powered by the Google Gemini API.
 - **📊 Patient & Clinician Dashboard**: Web UI for monitoring assessment history, distress probability trends, and modality attributions.
-- **🧘 Guided Breathing Module**: Relaxation interface with guided visual breathing exercises.
+- **🧘 Guided Breathing**: Interactive visual breathing exercises for relaxation.
 - **🛡️ Explainable AI (XAI)**: Gradient-based modality attribution to calculate the relative contribution of text vs. speech features.
 - **💾 Database Storage**: SQLite database powered by SQLAlchemy to save assessment records and clinician notes.
 
