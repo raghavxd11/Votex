@@ -25,8 +25,8 @@ def text_to_embedding(user_text):
     distress_count = sum(1 for w in words if any(k in w for k in distress_keywords))
     
     if distress_count > 0:
-        # Shift embedding values towards high distress cluster
-        base_embedding += (distress_count * 0.8)
+        # Shift embedding values towards distress cluster moderately
+        base_embedding += (distress_count * 0.25)
         
     return base_embedding
 
@@ -43,7 +43,6 @@ def run_interactive_inference():
     if os.path.exists(weights_path):
         try:
             state_dict = torch.load(weights_path, map_location=torch.device('cpu'))
-            # Filter compatible keys if architecture signatures match
             model_dict = model.state_dict()
             compatible = {k: v for k, v in state_dict.items() if k in model_dict and v.shape == model_dict[k].shape}
             model_dict.update(compatible)
@@ -74,12 +73,14 @@ def run_interactive_inference():
     has_distress = any(k in user_text.lower() for k in distress_keywords)
     audio_seed = 42 if has_distress else 99
     torch.manual_seed(audio_seed)
-    audio_features = torch.randn(1, 40) + (1.2 if has_distress else -0.5)
+    audio_features = torch.randn(1, 40) + (0.4 if has_distress else -0.3)
 
-    # 4. Multimodal Forward Pass
+    # 4. Multimodal Forward Pass & Calibrated Temperature Scaling
     with torch.no_grad():
         logits = model(text_features, audio_features)
-        probabilities = torch.softmax(logits, dim=1)
+        # Apply Temperature Scaling (T=2.2) to calibrate overconfident neural network logits
+        calibrated_logits = logits / 2.2
+        probabilities = torch.softmax(calibrated_logits, dim=1)
 
     prob_stable = probabilities[0][0].item() * 100
     prob_distressed = probabilities[0][1].item() * 100
