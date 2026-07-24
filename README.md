@@ -18,7 +18,7 @@ The platform includes a FastAPI backend, a Next.js 14 web interface, and explain
 - **🎙️ Speech & Text Diagnostics**: Real-time microphone audio processing combined with transcript text classification.
 - **🤖 AI Assistant**: Conversational chat interface powered by the Google Gemini API.
 - **📊 Patient & Clinician Dashboard**: Web UI for monitoring assessment history, distress probability trends, and modality attributions.
-- **🧘 Guided Breathing**: Interactive visual breathing exercises for relaxation.
+- **🧘 Guided Breathing**: Provides visual breathing suggestions and relaxation instructions.
 - **🛡️ Explainable AI (XAI)**: Gradient-based modality attribution to calculate the relative contribution of text vs. speech features.
 - **💾 Database Storage**: SQLite database powered by SQLAlchemy to save assessment records and clinician notes.
 
