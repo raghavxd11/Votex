@@ -1,5 +1,5 @@
-# Votex Intelligence 4.0 🚀
-*Next-Gen Multimodal Clinical Diagnostic & AI Therapy Platform*
+# Votex 🚀
+*Multimodal Mental Health Distress Detection System*
 
 [![Python](https://img.shields.io/badge/Backend-FastAPI-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js%2014-black?style=flat&logo=next.js)](https://nextjs.org/)
@@ -7,18 +7,20 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 📖 Overview
-Votex Intelligence is an enterprise-grade clinical platform that leverages **Multimodal Deep Learning** to detect mental health distress signatures. By fusing **Acoustic Vocal Bio-markers** with **Semantic Textual Analysis**, the system provides high-precision diagnostics (>93% accuracy) and delivers autonomous therapeutic interventions through an interactive AI therapist.
+Votex is a multimodal deep learning framework designed to detect mental health distress signatures from speech and text. By combining **Librosa-extracted audio features (MFCCs)** with **BERT text embeddings**, the system classifies input into *Stable* or *Distressed* categories using a PyTorch cross-attention fusion network (`CrossAttentionFusionNet`).
+
+The platform includes a FastAPI backend, a Next.js 14 web interface, and explainable AI (XAI) feature attribution analysis.
 
 ---
 
 ## ✨ Key Features
-- **🧠 Multimodal Fusion Engine**: Synergizes `Librosa` MFCC audio feature extraction with `HuggingFace BERT` transformer embeddings using a custom PyTorch cross-attention architecture.
-- **🎙️ Real-Time Waveform Visualization**: Live microphone streaming with millisecond-latency STT (Speech-to-Text) and dynamic emotion-responsive waveforms.
-- **🤖 Autonomous AI Therapist**: A conversational assistant that maps real-time distress probabilities to clinical recommendations and grounding exercises.
-- **📊 Interactive Clinician Dashboard**: Stunning glassmorphic UI for tracking patient longitudinal data, sentiment trends, and diagnostic archives.
-- **🧘 Zen Meditation Module**: Full-screen recursive breathing tools with synthetic UI expansion, binaural drones, and guided audio instructions.
-- **🛡️ Explainable AI (XAI)**: Integrated **SHAP** values to justify diagnostic decisions, providing transparency for clinical practitioners.
-- **💾 Resilient Persistence**: Auto-healing SQLite layer with `SQLAlchemy` and localized `localStorage` caching for uncrashable performance.
+- **🧠 Multimodal Fusion Engine**: Synergizes 40-dimensional MFCC acoustic features with 768-dimensional BERT text embeddings using PyTorch Multi-Head Cross-Attention.
+- **🎙️ Speech & Text Diagnostics**: Real-time microphone audio processing combined with transcript text classification.
+- **🤖 AI Support Assistant**: Interactive conversational interface that provides grounding recommendations based on distress predictions.
+- **📊 Patient & Clinician Dashboard**: Web UI for monitoring assessment history, distress probability trends, and modality attributions.
+- **🧘 Guided Breathing Module**: Relaxation interface with guided visual breathing exercises.
+- **🛡️ Explainable AI (XAI)**: Gradient-based modality attribution to calculate the relative contribution of text vs. speech features.
+- **💾 Database Storage**: SQLite database powered by SQLAlchemy to save assessment records and clinician notes.
 
 ---
 
@@ -26,81 +28,87 @@ Votex Intelligence is an enterprise-grade clinical platform that leverages **Mul
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend** | Next.js 14, TypeScript, TailwindCSS, Framer Motion, Lucide React |
+| **Frontend** | Next.js 14, TypeScript, TailwindCSS, Framer Motion |
 | **Backend** | FastAPI, Python 3.10+, SQLAlchemy, Pydantic |
-| **AI/ML** | PyTorch, Transformers (BERT), SHAP, Librosa, Scikit-learn, Vader |
-| **Database** | SQLite (Relational), LocalStorage (Client-side Cache) |
-| **DevOps** | Docker, Docker Compose, Unified Batch Deployment |
+| **AI/ML** | PyTorch, HuggingFace Transformers (BERT), Librosa, Scikit-learn |
+| **Database** | SQLite |
+| **DevOps** | Docker, Docker Compose, Batch Script |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started & Guided Instructions
 
 ### Prerequisites
 - **Python 3.10+**
 - **Node.js 20+**
-- **FFmpeg** (for audio processing)
+- **FFmpeg** (required for audio processing)
 
-### Quick Start (Standalone ML Demo)
-To test the PyTorch multimodal fusion model instantly without starting web servers:
+---
+
+### Option 1: Quick Standalone ML Test (Terminal Only)
+To test the PyTorch model logic directly from the terminal without starting web servers:
 ```bash
 python inference_demo.py
 ```
 
-### Quick Start Full Stack (Windows)
-To launch the entire platform (Frontend + Backend) with a single command:
-1. Navigate to the project root.
-2. Run the master deployment script:
+---
+
+### Option 2: Full Stack Launch (Windows - One Click)
+To start both the FastAPI backend and Next.js frontend automatically:
+1. Open terminal in the project root folder.
+2. Run the startup script:
    ```bash
    start_nexus.bat
    ```
-*This script automatically handles port cleanup, dependency checks, and concurrent service starts.*
+3. Open your browser and go to: `http://localhost:3000`
 
-### Manual Setup
+---
 
-#### Backend
+### Option 3: Manual Step-by-Step Setup
+
+#### Step 1: Start Backend (FastAPI)
 ```bash
 cd backend
 pip install -r requirements.txt
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
+*Backend API docs will be available at: `http://localhost:8000/docs`*
 
-#### Frontend
+#### Step 2: Start Frontend (Next.js)
+Open a second terminal window:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+*Frontend interface will be available at: `http://localhost:3000`*
 
 ---
 
 ## 📂 Project Structure
 ```text
 .
-├── backend/            # FastAPI Application (v1 API, DB, Services)
-├── frontend/           # Next.js 14 Frontend (App Router, Components)
-├── ml_pipeline/        # Model Training, Augmentation & Evaluation
-├── scripts/            # Utility and maintenance scripts
-├── models/             # Pre-trained Weights (.pth & .pkl)
-├── Actor_XX/           # Diagnostic Audio Datasets (RAVDESS)
-└── docker-compose.yml  # Container Orchestration
+├── backend/            # FastAPI REST API, database schemas, & inference services
+├── frontend/           # Next.js 14 Web Dashboard & UI components
+├── ml_pipeline/        # PyTorch model architecture, feature extraction & training scripts
+├── docs/               # Architecture & feature documentation
+├── inference_demo.py   # Standalone terminal demo script
+├── start_nexus.bat     # Windows 1-click startup launcher
+└── docker-compose.yml  # Docker container configuration
 ```
 
 ---
 
-## 🩺 Diagnostic Logic
-The platform executes a three-stage fusion process:
-1. **Acoustic Path**: Extracts 40 features (MFCCs, Spectral Centroid, Zero Crossing Rate) via Librosa.
-2. **Semantic Path**: Processes transcription through a BERT-based transformer for context-aware sentiment.
-3. **Fusion Layer**: A custom Cross-Attention model weights inputs (40% Audio, 30% Text, 30% Sentiment) to produce a unified distress score.
+## 🩺 Multimodal Model Architecture
+The system executes a three-step fusion process:
+1. **Acoustic Path**: Extracts 40 Mel-Frequency Cepstral Coefficients (MFCCs) using Librosa and normalizes them using `StandardScaler`.
+2. **Semantic Path**: Extracts 768-dimensional `[CLS]` token embeddings using pre-trained `bert-base-uncased`.
+3. **Cross-Attention Fusion Layer**: Projects both vectors to a shared 256-dimensional space and applies Multi-Head Attention where text acts as Query and audio acts as Key-Value pairs, followed by a 3-layer MLP classifier.
 
 ---
 
-## 🤝 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.s.
 
 ---
 *Built with ❤️ by the Votex Engineering Team as a milestone in Multimodal Clinical AI.*
