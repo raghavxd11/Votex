@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Votex Enterprise Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { background-color: #030712; color: #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .meter-fill { transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        
+        .glow-blue { position: absolute; top: -20%; left: -10%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(56,189,248,0.15) 0%, rgba(3,7,18,0) 70%); border-radius: 50%; pointer-events: none; z-index: -1; }
+        .glow-indigo { position: absolute; bottom: -20%; right: -10%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, rgba(3,7,18,0) 70%); border-radius: 50%; pointer-events: none; z-index: -1; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        
+        .therapy-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .therapy-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.3); border-color: rgba(99, 102, 241, 0.5); }
+
+        /* Meditation Orb Animation Layer */
+        @keyframes orbBreathe {
+            0% { transform: scale(1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.3); opacity: 0.8; }
+            40% { transform: scale(1.6); box-shadow: 0 0 100px rgba(56, 189, 248, 0.9); opacity: 1; }
+            70% { transform: scale(1.6); box-shadow: 0 0 100px rgba(56, 189, 248, 0.9); opacity: 1; }
+            100% { transform: scale(1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.3); opacity: 0.8; }
+        }
+        .orb {
+            width: 160px; height: 160px; border-radius: 50%;
+            background: radial-gradient(circle, #38bdf8 0%, #4f46e5 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen relative p-4 sm:p-8 flex flex-col items-center selection:bg-indigo-500/30">
+    <div class="glow-blue"></div>
+    <div class="glow-indigo"></div>
+
+    <div id="toast" class="fixed top-8 right-8 z-50 glass-panel px-6 py-4 rounded-xl shadow-2xl transform transition-all duration-300 translate-x-full opacity-0 flex items-center gap-4">
+        <span id="toastIcon" class="text-xl">⚠️</span>
+        <p id="toastMsg" class="text-sm font-medium text-white shadow-sm">Error</p>
+    </div>
+
+    <!-- Interactive Meditation Floating Action Button -->
+    <button onclick="toggleMeditation(true)" class="fixed bottom-6 right-6 lg:bottom-12 lg:right-12 glass-panel hover:bg-white/10 text-white font-bold py-3 px-5 rounded-full shadow-[0_10px_30px_rgba(99,102,241,0.2)] hover:shadow-[0_10px_40px_rgba(99,102,241,0.4)] transition-all z-40 flex items-center gap-3 border border-white/10 group cursor-pointer">
+        <span class="text-2xl group-hover:scale-110 transition duration-300">🧘</span>
+        <span class="pr-2 hidden sm:block tracking-wide">Guided Reset Module</span>
+    </button>
+
+    <!-- Fullscreen Guided Meditation Portal -->
+    <div id="meditationPortal" class="fixed inset-0 bg-[#030712]/95 backdrop-blur-3xl z-[100] hidden flex-col items-center justify-center transition-opacity duration-1000 opacity-0 overflow-hidden">
+        <button onclick="toggleMeditation(false)" class="absolute top-8 right-8 text-gray-500 hover:text-white uppercase text-xs font-black tracking-widest border border-gray-800 rounded-xl px-4 py-3 hover:bg-white/5 transition z-50">Disconnect Feed</button>
+        
+        <h2 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300 mb-24 drop-shadow-[0_0_20px_rgba(165,180,252,0.3)] tracking-tight text-center px-4" id="meditationPhaseText">Acoustic Stabilization Mode.</h2>
+        
+        <div class="orb relative z-10 flex items-center justify-center">
+            <div class="w-full h-full border border-white/20 rounded-full animate-ping opacity-20 absolute"></div>
+        </div>
+        
+        <div class="mt-28 text-gray-600 text-xs tracking-widest font-mono uppercase text-center max-w-sm flex border border-gray-800 rounded-2xl bg-black/50 p-4 shadow-inner">
+            <svg class="w-8 h-8 text-indigo-500 mr-4 flex-shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <div>
+                System synthesizing dual somatic binaural sub-frequencies:<br/>
+                <span class="text-indigo-400 font-bold block mt-1 tracking-widest text-sm">130.81Hz // 196.00Hz</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header UI -->
+    <header class="text-center mt-6 mb-10 w-full relative z-10">
+        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-4">
+            Votex <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Intelligence</span>
+        </h1>
+        <p class="text-gray-400 font-medium text-lg max-w-xl mx-auto">Multimodal Clinical Diagnostic Fusion Center</p>
+    </header>
+
+    <main class="w-full max-w-4xl relative z-10">
+        <!-- Account Bar -->
+        <div class="flex justify-between items-center mb-6 glass-panel px-6 py-4 rounded-2xl shadow-lg">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30 shadow-inner">
+                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none mb-1">Active Patient ID</span>
+                    <input type="text" id="patientId" value="USR_7719B" class="bg-transparent border-none p-0 text-white font-mono text-sm font-semibold focus:ring-0 outline-none w-32 placeholder-gray-600 transition">
+                </div>
+            </div>
+            <button onclick="toggleView()" id="viewToggleBtn" class="bg-white/5 hover:bg-white/10 text-white text-sm font-semibold py-2 px-5 rounded-xl border border-white/10 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                Patient History
+            </button>
+        </div>
+
+        <!-- Analysis Portal -->
+        <div id="analysisPortal" class="glass-panel rounded-3xl p-6 sm:p-10 shadow-2xl transition-all duration-500">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Acoustic Zone -->
+                <div class="space-y-6">
+                    <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-5 relative overflow-hidden group">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-sm font-bold text-gray-300">Live Acoustic Diagnostic</h2>
+                            <span id="sttStatus" class="flex h-2 w-2 relative"></span>
+                        </div>
+                        <div class="flex gap-3 h-14">
+                            <button id="recordBtn" onclick="toggleRecord()" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-3 relative overflow-hidden">
+                                <span class="absolute inset-0 bg-white/20 hover:opacity-0 transition duration-300 pointer-events-none"></span>
+                                <svg class="w-5 h-5 flex-shrink-0 relative z-10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.938v3.062a1 1 0 11-2 0v-3.062A5.986 5.986 0 014 9a1 1 0 112 0 4 4 0 108 0 1 1 0 112 0 5.986 5.986 0 01-5 5.938z" clip-rule="evenodd"></path></svg>
+                                <span id="recordBtnText" class="relative z-10">Capture Vocal Signature</span>
+                            </button>
+                            <button onclick="document.getElementById('audioInput').click()" class="w-14 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl flex items-center justify-center transition shadow-inner" title="Upload Pre-recorded .wav">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            </button>
+                            <input type="file" id="audioInput" accept="audio/wav" class="hidden">
+                        </div>
+                        <p class="text-[11px] text-gray-500 font-medium mt-3 text-center">Auto-transcribes speech directly into the semantic portal.</p>
+                        <div id="visualizerBox" class="w-full h-16 mt-4 bg-[#0a0f1d] border border-gray-800 rounded-xl hidden items-center justify-center p-1 overflow-hidden shadow-inner">
+                            <canvas id="visualizer" class="w-full h-full opacity-90"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-5 shadow-inner">
+                        <label class="text-sm font-bold text-gray-300 block mb-2">Supplemental Medical Files</label>
+                        <p class="text-xs text-gray-500 mb-3 leading-relaxed">Securely upload historical PDF or TXT diagnostics to fuse contextually.</p>
+                        <input type="file" id="docInput" accept=".pdf,.txt" class="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-white/5 file:text-white hover:file:bg-white/10 p-1 bg-black/20 border border-white/5 rounded-xl text-gray-400 transition outline-none focus:ring-1 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <!-- Semantic Zone -->
+                <div class="flex flex-col h-full">
+                    <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-5 flex-grow flex flex-col shadow-inner relative group">
+                         <div class="flex justify-between items-center mb-3 text-sm font-bold text-gray-300">
+                             <label>Semantic Critical Reasoning</label>
+                             <div class="flex items-center gap-3">
+                                 <span id="cacheIcon" class="text-[10px] text-indigo-400 font-mono flex items-center gap-1 opacity-0 transition-opacity"><svg class="w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Cached</span>
+                                 <button onclick="clearSemantic()" class="text-[10px] text-gray-500 hover:text-white transition uppercase tracking-wider">Clear</button>
+                             </div>
+                         </div>
+                         <textarea id="textInput" class="w-full h-full bg-black/40 border border-white/5 rounded-xl p-4 text-gray-200 text-sm focus:ring-1 focus:ring-indigo-500 outline-none resize-none placeholder-gray-600 font-medium shadow-inner transition leading-relaxed tracking-wide" placeholder="Resilient Local Cache active. Manually outline clinical anomalies or speak natively to transcribe dynamically..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Execute Diagnostic -->
+            <button id="analyzeBtn" onclick="analyze()" class="mt-8 relative w-full overflow-hidden bg-white text-gray-900 font-black tracking-wide py-4 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(255,255,255,0.2)] transition active:scale-[0.99] flex justify-center items-center gap-3 overflow-hidden group">
+                <span class="absolute inset-0 bg-gradient-to-r from-blue-200 to-indigo-200 opacity-0 group-hover:opacity-100 transition duration-300"></span>
+                <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span id="analyzeBtnText" class="relative z-10">Execute Tensor Fusion Diagnostic</span>
+            </button>
+
+            <!-- Diagnostic Return Container -->
+            <div id="resultBox" class="hidden mt-8 w-full transition-all duration-700 opacity-0 transform translate-y-4">
+                
+                <div class="bg-gray-900 rounded-t-2xl p-6 border border-gray-800 shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-3xl font-black text-white uppercase" id="statusLabel">Pending</span>
+                        <span id="probLabel" class="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-white to-gray-400 drop-shadow-md">0%</span>
+                    </div>
+                    <div class="h-5 bg-black/50 w-full rounded-full relative overflow-hidden border border-white/5">
+                        <div id="meterBox" class="h-full bg-blue-500 rounded-full meter-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-3 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                        <span>Healthy Baseline</span>
+                        <span>Severe Distress Vector</span>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800/60 rounded-b-2xl p-6 md:p-8 border border-t-0 border-gray-700 shadow-xl therapy-card flex flex-col md:flex-row gap-8 items-center">
+                    <div class="w-full md:w-1/3 flex-shrink-0 relative overflow-hidden rounded-xl aspect-[4/3] border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)] bg-black/50">
+                        <img id="therapyImage" src="/images/mental_clarity.png" class="object-cover w-full h-full transform hover:scale-110 transition duration-700 z-0" alt="Protocol">
+                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10"></div>
+                    </div>
+                    <div class="w-full md:w-2/3 flex flex-col justify-center">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-indigo-500/20 text-indigo-300 text-[10px] px-2.5 py-1 rounded font-black tracking-widest border border-indigo-500/30">AI THERAPIST ACTION</span>
+                        </div>
+                        <h3 id="therapyTitle" class="text-2xl font-bold text-white mb-3 leading-tight drop-shadow-lg">Therapeutic Protocol</h3>
+                        <p id="therapyBody" class="text-gray-400 text-sm leading-relaxed font-medium">Analyzing neural signatures to formulate robust treatment vectors...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Portal -->
+        <div id="historyPortal" class="hidden glass-panel rounded-3xl p-6 sm:p-10 shadow-2xl transition-all duration-500">
+            <h2 class="text-2xl font-bold text-white mb-2">Account Archives</h2>
+            <p class="text-sm text-gray-400 mb-8 border-b border-gray-800 pb-4">A complete temporal record of all diagnostics routed under this ID.</p>
+            <div id="historyLoader" class="text-center py-10 hidden">
+                 <svg class="animate-spin h-8 w-8 text-indigo-500 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            </div>
+            <div id="historyGrid" class="space-y-4 max-h-[500px] overflow-y-auto pr-2"></div>
+        </div>
+    </main>
+
+    <!-- Logic Engine -->
+    <script>
+        const UI = {
+            toast: document.getElementById('toast'), toastMsg: document.getElementById('toastMsg'), toastIcon: document.getElementById('toastIcon'),
+            audioInput: document.getElementById('audioInput'), visBox: document.getElementById('visualizerBox'),
+            visCanvas: document.getElementById('visualizer'), ctx: document.getElementById('visualizer').getContext('2d'),
+            recordBtn: document.getElementById('recordBtn'), btnText: document.getElementById('recordBtnText'),
+            sttStatus: document.getElementById('sttStatus'), textBox: document.getElementById('textInput'),
+            cacheIcon: document.getElementById('cacheIcon'),
+            docInput: document.getElementById('docInput'), patientId: document.getElementById('patientId'),
+            resultBox: document.getElementById('resultBox'), analyzeBtn: document.getElementById('analyzeBtn'),
+            analyzeBtnText: document.getElementById('analyzeBtnText'), analysisPortal: document.getElementById('analysisPortal'),
+            historyPortal: document.getElementById('historyPortal'), viewToggleBtn: document.getElementById('viewToggleBtn'),
+            historyGrid: document.getElementById('historyGrid'), historyLoader: document.getElementById('historyLoader'),
+            therapyImage: document.getElementById('therapyImage'), therapyTitle: document.getElementById('therapyTitle'),
+            therapyBody: document.getElementById('therapyBody')
+        };
+
+        // Resilient Session Storage Initialization
+        let baseText = '';
+        window.addEventListener('DOMContentLoaded', () => {
+            const cachedText = localStorage.getItem('votex_draft_payload');
+            if(cachedText) { UI.textBox.value = cachedText; baseText = cachedText; showCacheIcon(); }
+        });
+
+        UI.textBox.addEventListener('input', () => {
+            baseText = UI.textBox.value;
+            localStorage.setItem('votex_draft_payload', baseText);
+            showCacheIcon();
+        });
+
+        function clearSemantic() {
+            UI.textBox.value = ''; baseText = ''; localStorage.removeItem('votex_draft_payload');
+            UI.cacheIcon.classList.add('opacity-0');
+        }
+
+        function showCacheIcon() {
+            UI.cacheIcon.classList.remove('opacity-0');
+            setTimeout(() => UI.cacheIcon.classList.add('opacity-0'), 2000);
+        }
+
+        function showToast(message, type="error") {
+            UI.toastMsg.innerText = message; UI.toastIcon.innerText = type === "error" ? "⚠️" : "🚀";
+            UI.toast.classList.remove('translate-x-full', 'opacity-0');
+            setTimeout(() => UI.toast.classList.add('translate-x-full', 'opacity-0'), 4000);
+        }
+
+        // Resilient WebSpeech API Wrapper (auto saving inputs)
+        let recognition = null;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
+            recognition.onresult = (e) => {
+                let interimChunk = ''; let finalChunk = '';
+                for (let i = e.resultIndex; i < e.results.length; ++i) {
+                    if (e.results[i].isFinal) finalChunk += e.results[i][0].transcript;
+                    else interimChunk += e.results[i][0].transcript;
+                }
+                
+                if (finalChunk) baseText += finalChunk;
+                let display = baseText + interimChunk;
+                
+                UI.textBox.value = display;
+                UI.textBox.scrollTop = UI.textBox.scrollHeight; // Auto-scroll downward
+                
+                localStorage.setItem('votex_draft_payload', display);
+                if(finalChunk) showCacheIcon();
+            };
+            recognition.onerror = (e) => { if(e.error !== 'no-speech') console.warn("STT Exception Guarded:", e.error); };
+        }
+
+        // WebAudio Micro-Interception
+        let audioContext, scriptProcessor, recordingStream;
+        let leftchannel = [], recordingLength = 0, isRecording = false, recordedBlob = null;
+        let offset = 0, isVisActive = false;
+
+        function drawSine() {
+            try {
+                UI.ctx.clearRect(0, 0, UI.visCanvas.width, UI.visCanvas.height);
+                UI.ctx.beginPath(); UI.ctx.moveTo(0, UI.visCanvas.height / 2);
+                for (let i = 0; i < UI.visCanvas.width; i++) UI.ctx.lineTo(i, (UI.visCanvas.height / 2) + Math.sin(i * 0.05 + offset) * 15);
+                UI.ctx.strokeStyle = '#818cf8'; UI.ctx.lineWidth = 2.5; UI.ctx.stroke(); offset += 0.15;
+                if(isVisActive) requestAnimationFrame(drawSine);
+            } catch(e) {}
+        }
+
+        UI.audioInput.addEventListener('change', () => {
+            if(UI.audioInput.files.length > 0) {
+                UI.visBox.classList.remove('hidden'); UI.visBox.classList.add('flex');
+                isVisActive = true; drawSine(); recordedBlob = null; 
+                UI.btnText.innerText = "Capture Vocal Signature";
+                showToast("System stabilized local audio artifact.", "success");
+            }
+        });
+
+        async function toggleRecord() {
+            if (!isRecording) {
+                try {
+                    UI.audioInput.value = ""; leftchannel = []; recordingLength = 0; isRecording = true;
+                    UI.recordBtn.classList.replace('from-blue-600', 'from-red-600'); UI.recordBtn.classList.replace('to-indigo-600', 'to-rose-600');
+                    UI.btnText.innerText = "Terminate Secure Feed";
+                    UI.sttStatus.innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>`;
+                    
+                    if(recognition) { try { recognition.start(); } catch(e){} }
+                    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = audioContext.createMediaStreamSource(recordingStream);
+                    scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+                    source.connect(scriptProcessor); scriptProcessor.connect(audioContext.destination);
+
+                    scriptProcessor.onaudioprocess = function(e) {
+                        const left = e.inputBuffer.getChannelData(0);
+                        leftchannel.push(new Float32Array(left)); recordingLength += 4096;
+                    };
+                    
+                    UI.visBox.classList.remove('hidden'); UI.visBox.classList.add('flex');
+                    UI.visCanvas.width = UI.visBox.clientWidth; isVisActive = true; drawSine();
+                } catch(e) { showToast("Microphone denied. Hard-fallback to manual upload.", "error"); isRecording = false; }
+            } else {
+                finalizeAcousticBuffer();
+            }
+        }
+
+        // Extracts whatever audio was captured even if abruptly cutoff
+        function finalizeAcousticBuffer() {
+            isRecording = false;
+            try { if(recognition) recognition.stop(); } catch(e){}
+            try {
+                if(scriptProcessor) { scriptProcessor.disconnect(); audioContext.close(); recordingStream.getTracks().forEach(t => t.stop()); }
+            } catch(e) { console.warn("Gracefully intercepting stream closure gap."); }
+            
+            isVisActive = false;
+            
+            const merged = new Float32Array(recordingLength);
+            let off = 0;
+            for (let i = 0; i < leftchannel.length; i++) { merged.set(leftchannel[i], off); off += leftchannel[i].length; }
+            if(recordingLength > 0) recordedBlob = new Blob([encodeWAV(merged, audioContext?.sampleRate || 44100)], { type: 'audio/wav' });
+
+            UI.recordBtn.classList.replace('from-red-600', 'from-blue-600'); UI.recordBtn.classList.replace('to-rose-600', 'to-indigo-600');
+            UI.btnText.innerText = "Acoustics Captured";
+            UI.sttStatus.innerHTML = `<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_10px_#10b981]"></span>`;
+        }
+
+        // Failsafe listener if user abruptly leaves page, attempt to finalize buffer
+        window.addEventListener('beforeunload', () => { if(isRecording) finalizeAcousticBuffer(); });
+
+        function encodeWAV(samples, sampleRate) {
+            const buffer = new ArrayBuffer(44 + samples.length * 2); const view = new DataView(buffer);
+            const w = (o, s) => { for(let i=0; i<s.length; i++) view.setUint8(o+i, s.charCodeAt(i)); };
+            w(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+            view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true); view.setUint16(34, 16, true); w(36, 'data'); view.setUint32(40, samples.length * 2, true);
+            let offset = 44;
+            for (let i = 0; i < samples.length; i++, offset += 2) {
+                let s = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+            return view;
+        }
+
+        // --- Neural Guided Meditation Engine ---
+        let droneActive = false;
+        let droneCtx, osc1, osc2, droneGain;
+        let meditationInterval, activeBreathTimeout;
+        let mPortal = document.getElementById('meditationPortal');
+        let mText = document.getElementById('meditationPhaseText');
+
+        function initDrone() {
+            try {
+                droneCtx = new (window.AudioContext || window.webkitAudioContext)();
+                osc1 = droneCtx.createOscillator(); osc1.type = 'sine'; osc1.frequency.value = 130.81; // C3
+                osc2 = droneCtx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = 196.00; // G3
+                droneGain = droneCtx.createGain(); droneGain.gain.value = 0.05; 
+                osc1.connect(droneGain); osc2.connect(droneGain); droneGain.connect(droneCtx.destination);
+                osc1.start(); osc2.start();
+            } catch(e) { console.warn("AudioContext prohibited. Silently ignoring drone."); }
+        }
+
+        function stopDrone() {
+            if(droneGain && droneCtx) {
+                try {
+                    droneGain.gain.setValueAtTime(droneGain.gain.value, droneCtx.currentTime);
+                    droneGain.gain.exponentialRampToValueAtTime(0.0001, droneCtx.currentTime + 0.3);
+                } catch(e){}
+                
+                let o1 = osc1, o2 = osc2, ctx = droneCtx;
+                setTimeout(() => { try { if(o1) o1.stop(); if(o2) o2.stop(); if(ctx.state !== 'closed') ctx.close(); } catch(e){} }, 400);
+                osc1 = null; osc2 = null; droneGain = null; droneCtx = null;
+            }
+        }
+
+        function speakGuide(text) {
+            if(!window.speechSynthesis) return;
+            const u = new SpeechSynthesisUtterance(text);
+            let voices = window.speechSynthesis.getVoices();
+            u.voice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Female')) || voices[0];
+            u.pitch = 0.8; u.rate = 0.7; u.volume = 0.6;
+            try { window.speechSynthesis.speak(u); } catch(e) {}
+        }
+
+        // To ensure browser loads voices correctly due to async Chrome issue
+        if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+
+        function toggleMeditation(start = true) {
+            if(start) {
+                if(mPortal.dataset.active === "true") return;
+                mPortal.classList.remove('hidden');
+                setTimeout(() => mPortal.classList.remove('opacity-0'), 50);
+                
+                let orb = document.querySelector('.orb');
+                orb.style.animation = 'none'; void orb.offsetWidth; // reset
+                
+                initDrone();
+                
+                let isCycleActive = true;
+                const runCycle = () => {
+                    if(!isCycleActive) return;
+                    orb.style.animation = 'orbBreathe 19s infinite cubic-bezier(0.4, 0, 0.2, 1)';
+                    mText.innerText = "Inhale... Fill the lungs.";
+                    speakGuide("Breathe in deeply.");
+                    
+                    activeBreathTimeout = setTimeout(() => {
+                        if(!isCycleActive) return;
+                        mText.innerText = "Hold the breath...";
+                        // speakGuide("Hold.");
+                    }, 4000);
+                    
+                    setTimeout(() => {
+                        if(!isCycleActive) return;
+                        mText.innerText = "Exhale completely.";
+                        speakGuide("Exhale very slowly.");
+                    }, 11000);
+                };
+                
+                runCycle();
+                meditationInterval = setInterval(runCycle, 19000);
+                
+                // Expose internal flag closure to stop button
+                mPortal.dataset.active = "true";
+            } else {
+                if(mPortal.dataset.active !== "true") return;
+                mPortal.dataset.active = "false";
+                clearInterval(meditationInterval); clearTimeout(activeBreathTimeout);
+                mPortal.classList.add('opacity-0');
+                setTimeout(() => mPortal.classList.add('hidden'), 1000);
+                try { 
+                    window.speechSynthesis.cancel(); 
+                    window.speechSynthesis.pause(); 
+                    window.speechSynthesis.resume(); 
+                    window.speechSynthesis.cancel(); 
+                } catch(e){}
+                stopDrone();
+            }
+        }
+
+        // --- Main Analysis Logic ---
+        async function analyze() {
+            const text = UI.textBox.value.trim(), doc = UI.docInput.files[0], userId = UI.patientId.value.trim();
+            let audio = UI.audioInput.files[0];
+            if (recordedBlob) audio = new File([recordedBlob], "live.wav", { type: "audio/wav" });
+
+            if (!userId) return showToast("A valid ID is required.", "error");
+            if (!audio) return showToast("Acoustic node missing.", "error");
+            if (!text && !doc) return showToast("Semantic payload empty.", "error");
+            
+            UI.analyzeBtnText.innerHTML = `Compiling Tensors...`; UI.analyzeBtn.disabled = true;
+            UI.resultBox.classList.add('hidden', 'opacity-0', 'translate-y-4');
+
+            const fd = new FormData();
+            fd.append("text", text); fd.append("user_id", userId); fd.append("audio", audio); if(doc) fd.append("document", doc);
+
+            try {
+                const res = await fetch("/v1/analyze", { method: 'POST', body: fd });
+                if (!res.ok) throw new Error("Server synchronization failure.");
+                const data = await res.json();
+                
+                UI.resultBox.classList.remove('hidden');
+                setTimeout(() => UI.resultBox.classList.remove('opacity-0', 'translate-y-4'), 50);
+
+                document.getElementById('probLabel').innerText = data.distress_probability.toFixed(1) + "%";
+                setTimeout(() => document.getElementById('meterBox').style.width = data.distress_probability + "%", 200);
+                
+                const sLbl = document.getElementById('statusLabel');
+                sLbl.innerText = data.status;
+                
+                if(data.distress_probability > 50) {
+                    document.getElementById('meterBox').className = "h-full bg-red-500 rounded-full meter-fill shadow-[0_0_15px_#ef4444]";
+                    sLbl.className = "text-3xl font-black text-red-500 shadow-sm uppercase";
+                } else {
+                    document.getElementById('meterBox').className = "h-full bg-emerald-400 rounded-full meter-fill shadow-[0_0_15px_#10b981]";
+                    sLbl.className = "text-3xl font-black text-emerald-400 shadow-sm uppercase";
+                }
+
+                UI.therapyTitle.innerText = data.recommendation_title || "Therapeutic Baseline";
+                UI.therapyBody.innerText = data.recommendation_body || "Protocol initialized.";
+                if(data.image_url) UI.therapyImage.src = data.image_url;
+                
+                // Clear cache upon successful routing
+                localStorage.removeItem('votex_draft_payload');
+
+            } catch(e) { showToast(e.message, "error"); }
+            UI.analyzeBtnText.innerText = "Execute Tensor Fusion Diagnostic"; UI.analyzeBtn.disabled = false;
+        }
+
+        async function toggleView() {
+            if (UI.historyPortal.classList.contains('hidden')) {
+                UI.analysisPortal.classList.add('hidden'); UI.historyPortal.classList.remove('hidden');
+                UI.viewToggleBtn.innerHTML = `🔙 Return to Terminal`;
+                UI.historyGrid.innerHTML = ''; UI.historyLoader.classList.remove('hidden');
+                try {
+                    const res = await fetch(`/v1/history/${UI.patientId.value.trim()}`);
+                    if(!res.ok) throw new Error("Database inaccessible.");
+                    const data = await res.json();
+                    UI.historyLoader.classList.add('hidden');
+                    if(data.length === 0) return UI.historyGrid.innerHTML = `<div class="text-center py-8 text-gray-500 font-medium">No prior intelligence vectors exist.</div>`;
+                    data.forEach(r => {
+                        const isD = r.probability > 50;
+                        UI.historyGrid.innerHTML += `
+                            <div class="bg-black/30 border border-white/5 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between hover:bg-black/40 transition">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2"><span class="text-xs font-mono text-gray-500">${r.timestamp}</span></div>
+                                    <p class="text-sm text-gray-300 font-medium italic line-clamp-2">"${r.text}"</p>
+                                </div>
+                                <div class="flex flex-col items-end min-w-[100px]">
+                                    <span class="text-xl font-black ${isD ? 'text-red-400' : 'text-emerald-400'}">${r.probability.toFixed(1)}%</span>
+                                    <span class="text-[10px] uppercase font-bold tracking-widest text-gray-500">${r.status}</span>
+                                </div>
+                            </div>`;
+                    });
+                } catch(e) { UI.historyLoader.classList.add('hidden'); showToast("Failed to pull encrypted history.", "error"); }
+            } else {
+                UI.historyPortal.classList.add('hidden'); UI.analysisPortal.classList.remove('hidden');
+                UI.viewToggleBtn.innerHTML = `🗃️ Patient History`;
+            }
+        }
+    </script>
+</body>
+</html>
