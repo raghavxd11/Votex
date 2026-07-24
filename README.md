@@ -16,7 +16,7 @@ The platform includes a FastAPI backend, a Next.js 14 web interface, and explain
 ## ✨ Key Features
 - **🧠 Multimodal Fusion Engine**: Synergizes 40-dimensional MFCC acoustic features with 768-dimensional BERT text embeddings using PyTorch Multi-Head Cross-Attention.
 - **🎙️ Speech & Text Diagnostics**: Real-time microphone audio processing combined with transcript text classification.
-- **🤖 AI Support Assistant**: Interactive conversational interface that provides grounding recommendations based on distress predictions.
+- **🤖 AI Support Assistant**: Interactive conversational interface powered by Google Gemini API (`GEMINI_API_KEY`) that provides grounding recommendations based on distress predictions.
 - **📊 Patient & Clinician Dashboard**: Web UI for monitoring assessment history, distress probability trends, and modality attributions.
 - **🧘 Guided Breathing Module**: Relaxation interface with guided visual breathing exercises.
 - **🛡️ Explainable AI (XAI)**: Gradient-based modality attribution to calculate the relative contribution of text vs. speech features.
@@ -28,7 +28,7 @@ The platform includes a FastAPI backend, a Next.js 14 web interface, and explain
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend** | Next.js 14, TypeScript, TailwindCSS, Framer Motion |
+| **Frontend** | Next.js 14, TypeScript, TailwindCSS, Framer Motion, Google Gemini API |
 | **Backend** | FastAPI, Python 3.10+, SQLAlchemy, Pydantic |
 | **AI/ML** | PyTorch, HuggingFace Transformers (BERT), Librosa, Scikit-learn |
 | **Database** | SQLite |
@@ -42,6 +42,7 @@ The platform includes a FastAPI backend, a Next.js 14 web interface, and explain
 - **Python 3.10+**
 - **Node.js 20+**
 - **FFmpeg** (required for audio processing)
+- **Google Gemini API Key** (set as `GEMINI_API_KEY` in environment variables for conversational AI assistant)
 
 ---
 
