@@ -8,8 +8,16 @@ Version: VOTEX_96.4_STABLE
 """
 
 import os
+import sys
 import torch
 import torch.nn as nn
+
+# Force UTF-8 encoding for Windows console compatibility
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
 # Import the architecture directly from the project
 try:
     from ml_pipeline.model import CrossAttentionFusionNet
@@ -41,10 +49,12 @@ def run_performance_audit():
     print("="*60)
     
     # Weights Configuration
-    weight_path = "cross_attn_enterprise_model.pth"
+    weight_path = os.path.join("ml_pipeline", "models", "cross_attn_enterprise_model.pth")
+    if not os.path.exists(weight_path):
+        weight_path = "cross_attn_enterprise_model.pth"
+    
     if not os.path.exists(weight_path):
          print(f"CRITICAL: Weights file '{weight_path}' not found.")
-         print("Please ensure you are running this in the project root.")
          return
 
     print(f"STATUS: Successfully loaded '{weight_path}' (96.4% Verified Assets)")

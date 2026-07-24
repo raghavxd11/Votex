@@ -6,38 +6,31 @@ Sensitivity-Ablation (XAI) to demonstrate the 96.46% accuracy.
 """
 
 import os
+import sys
 import torch
 import torch.nn as nn
+
+# Force UTF-8 encoding for Windows console compatibility
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix
 
 # 1. Configuration & Data Loading
-WEIGHTS = "cross_attn_enterprise_model.pth"
+WEIGHTS = os.path.join("ml_pipeline", "models", "cross_attn_enterprise_model.pth")
 FEATURES_PATH = "ml_pipeline/ravdess_features_deep.npy"
 LABELS_PATH = "ml_pipeline/ravdess_labels_deep.npy"
 
-# Architecture definition to ensure standalone execution
-class CrossAttentionFusionNet(nn.Module):
-    def __init__(self, text_dim=768, audio_dim=40):
-        super(CrossAttentionFusionNet, self).__init__()
-        self.text_fc = nn.Linear(text_dim, 256)
-        self.audio_fc = nn.Linear(audio_dim, 256)
-        self.attention = nn.MultiheadAttention(embed_dim=256, num_heads=8, batch_first=True)
-        self.classifier = nn.Sequential(
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Dropout(0.4),
-            nn.Linear(128, 1),
-            nn.Sigmoid()
-        )
+# Ensure project root is on sys.path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
-    def forward(self, text_feat, audio_feat):
-        t = self.text_fc(text_feat).unsqueeze(1)
-        a = self.audio_fc(audio_feat).unsqueeze(1)
-        # Cross-Attention: Text queries Audio
-        attn_out, _ = self.attention(t, a, a)
-        return self.classifier(attn_out.squeeze(1))
+from ml_pipeline.model import CrossAttentionFusionNet
 
 def run_live_audit():
     print("="*70)
@@ -65,8 +58,9 @@ def run_live_audit():
 
     # 3. Live Inference Pass
     with torch.no_grad():
-        outputs = model(X_text, X_audio).squeeze()
-        y_pred_probs = outputs.numpy()
+        logits = model(X_text, X_audio)
+        probs = torch.softmax(logits, dim=1)
+        y_pred_probs = probs[:, 1].numpy()
         y_pred = (y_pred_probs >= 0.50).astype(int)
 
     # 4. Accuracy & F1 Calculation
@@ -86,12 +80,12 @@ def run_live_audit():
     # 5a. Mute Text Signal
     with torch.no_grad():
         text_muted = torch.zeros_like(X_text[test_idx:test_idx+1])
-        score_no_text = model(text_muted, X_audio[test_idx:test_idx+1]).item()
+        score_no_text = torch.softmax(model(text_muted, X_audio[test_idx:test_idx+1]), dim=1)[0, 1].item()
         
     # 5b. Mute Audio Signal
     with torch.no_grad():
         audio_muted = torch.zeros_like(X_audio[test_idx:test_idx+1])
-        score_no_audio = model(X_text[test_idx:test_idx+1], audio_muted).item()
+        score_no_audio = torch.softmax(model(X_text[test_idx:test_idx+1], audio_muted), dim=1)[0, 1].item()
 
     text_impact = abs(original_score - score_no_text)
     audio_impact = abs(original_score - score_no_audio)

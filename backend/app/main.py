@@ -48,6 +48,15 @@ if not os.path.exists(static_dir):
 
 app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
 
+@app.get("/health")
+def health_check():
+    return {
+        "status": "online",
+        "service": "Votex Intelligence API",
+        "version": "4.0.0",
+        "model_loaded": True
+    }
+
 @app.get("/")
 def serve_frontend():
     # Redirect users natively heading to the backend port directly to the Next.js UI component
