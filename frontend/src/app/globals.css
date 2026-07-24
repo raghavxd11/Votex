@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-card: rgba(17, 24, 45, 0.7);
+  --bg-card-hover: rgba(22, 30, 55, 0.85);
+  --border-subtle: rgba(99, 115, 171, 0.15);
+  --border-hover: rgba(99, 115, 171, 0.3);
+  --accent-blue: #4f8ef7;
+  --accent-indigo: #6366f1;
+  --accent-emerald: #34d399;
+  --text-primary: #f0f2f8;
+  --text-secondary: #8892b0;
+  --text-muted: #5a6380;
+  --glow-blue: rgba(79, 142, 247, 0.15);
+  --glow-indigo: rgba(99, 102, 241, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle animated gradient background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, var(--glow-indigo), transparent),
+    radial-gradient(ellipse 60% 50% at 80% 50%, var(--glow-blue), transparent),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(52, 211, 153, 0.06), transparent);
+  pointer-events: none;
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(99, 102, 241, 0.3);
+  color: #fff;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 115, 171, 0.25);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 115, 171, 0.4);
+}
+
+/* Smooth focus styles */
+:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Glass card utility */
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+/* Pulse glow for active elements */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--glow-blue); }
+  50% { box-shadow: 0 0 40px var(--glow-blue), 0 0 60px var(--glow-indigo); }
+}
+
+/* Gentle float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Fade-in entrance */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+}
+.animate-fade-up-delay {
+  animation: fade-up 0.6s ease-out 0.15s forwards;
+  opacity: 0;
+}
+.animate-fade-up-delay-2 {
+  animation: fade-up 0.6s ease-out 0.3s forwards;
+  opacity: 0;
+}
