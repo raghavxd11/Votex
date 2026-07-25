@@ -107,7 +107,7 @@ def run_interactive_inference():
         elif abs(polarity) >= 0.4:
             distress_weight = 0.65  # Moderate distress
         else:
-            distress_weight = 0.51  # Mild distress (~51%)
+            distress_weight = 0.49  # Mild distress (~49%)
             
         prob_distressed = distress_weight * 100
         prob_stable = (1.0 - distress_weight) * 100

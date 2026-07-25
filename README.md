@@ -109,7 +109,4 @@ The system executes a three-step fusion process:
 ---
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.s.
-
----
-*Built with ❤️ by the Votex Engineering Team as a milestone in Multimodal Clinical AI.*
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
